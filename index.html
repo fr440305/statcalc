@@ -5,10 +5,13 @@
 	<meta charset='utf8'>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
+table, tr, td {
+	border: 1px solid black;
+}
 textarea {
 	font-size: 18px;
 	width: 90%;
-	height: 50%;
+	height: 10em;
 	margin: auto;
 }
 
@@ -16,13 +19,36 @@ textarea {
 	width: 90%;
 	margin: auto;
 }
+
+#result {
+	display: none;
+}
 	</style>
 </head>
 <body>
 	<textarea placeholder='23 34 12 33 45' id='data'></textarea>
 	<input type='button' value='Go' id='btn_calculate'></input>
-	<div id='result'></div>
-	<script>
+	<div id='result'>
+		<table>
+			<tr><td>Sorted dataset</td><td>{{#sorted}}{{.}} {{/sorted}}</td></tr>
+			<tr><td>Mean</td><td>{{mean}}</td></tr>
+			<tr><td>Median</td><td>{{median}}</td></tr>
+			<tr><td>Modes</td><td>{{#modes}}{{.}}, appeared {{maxfreq}} times.{{/modes}}{{^modes}}N/A{{/modes}}</td></tr>
+			<tr><td>Minimum and Maximun</td><td>min = {{min}}, max = {{max}}</td></tr>
+			<tr><td>Range</td><td>{{max}} - {{min}} = <b>{{range}}</b></td></tr>
+			<tr><td>Quartiles</td><td>q1 = <b>{{q1}}</b>, q2 = <b>{{q2}}</b>, q3 = <b>{{q3}}</b></td></tr>
+
+		</table>
+	</div>
+
+<!--
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+-->
+<script src="https://unpkg.com/mustache@latest"></script>
+<script>
+
+TMPL = result.innerHTML;
 
 function getArray(text) {
 	arr = [];
@@ -58,8 +84,8 @@ function getMedian(arr) {
 	return median;
 }
 
-
 function getCharacteristicValues(arr) {
+	console.log(arr.length);
 	if (arr.length === 0) {
 		return ({"err": "Empty dataset is not valid."});
 	}
@@ -124,24 +150,39 @@ function getCharacteristicValues(arr) {
 		"mean": mean,
 		"median": median,
 		"modes": modes,
+		"hasmode": (modes.length > 0),
+		"maxfreq": maxFreq,
 		"freqtable": dictValFreq,
 		"variance": variance,
 		"stddev": Math.sqrt(variance),
-		"minmax": [arr[0], arr[arr.length-1]],
+		"min": arr[0],
+		"max": arr[arr.length-1],
 		"range": arr[arr.length-1] - arr[0],
-		"quartiles": [arr[0], q1, q2, q3, arr[arr.length-1]]
+		//"quartiles": [arr[0], q1, q2, q3, arr[arr.length-1]]
+		"q1": q1,
+		"q2": q2,
+		"q3": q3
 	});
 }
 
-btn_calculate.onclick = function(){
-	info = getCharacteristicValues(getArray(data.value));
-	if (info.err !== undefined) {
-		result.innerText = info.err;
-	} else {
-		result.innerText = JSON.stringify(info);
-	}
+function renderResult(tmpl, res) {
+	var rendered = Mustache.render(tmpl, res);
+	console.log(rendered);
+	//result.innerText = JSON.stringify(res);
+	result.innerHTML = rendered;
 }
 
-	</script>
+btn_calculate.onclick = function(){
+	var res = getCharacteristicValues(getArray(data.value));
+	console.log(res);
+	if (res.err && res.err.length > 0) {
+		result.innerText = res.err;
+	} else {
+		renderResult(TMPL, res);
+	}
+	result.style.display = 'block';
+}
+
+</script>
 </body>
 </html>
