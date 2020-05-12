@@ -15,11 +15,15 @@ table, tr, td {
 	border: 1px solid black;
 }
 
-textarea, input {
+textarea {
 	font-size: 18px;
 	width: 90%;
 	height: 10em;
 	margin: 0 auto;
+}
+
+input {
+	font-size: 18px;
 }
 
 #btn_calculate {
@@ -40,7 +44,10 @@ textarea, input {
 			<tr><td>Sorted Dataset</td><td>{{#sorted}}{{.}} {{/sorted}}</td></tr>
 			<tr><td>Mean</td><td>{{mean}}</td></tr>
 			<tr><td>Median</td><td>{{median}}</td></tr>
-			<tr><td>Modes</td><td>{{#modes}}{{.}}, appeared {{maxfreq}} times.{{/modes}}{{^modes}}N/A{{/modes}}</td></tr>
+			<tr>
+				<td>Modes</td>
+				<td>{{#modes}}{{.}}, {{/modes}}{{#hasmode}}appeared {{maxfreq}} times.{{/hasmode}}{{^modes}}N/A{{/modes}}</td>
+			</tr>
 			<tr><td>Minimum and Maximun</td><td>min = {{min}}, max = {{max}}</td></tr>
 			<tr><td>Quartiles</td><td>q1 = <b>{{q1}}</b>, q2 = <b>{{q2}}</b>, q3 = <b>{{q3}}</b></td></tr>
 			<tr><td>Range</td><td>{{max}} - {{min}} = <b>{{range}}</b></td></tr>
