@@ -172,11 +172,17 @@ function getCharacteristicValues(arr) {
 	// If arr.length odd, then GET RID OF THE MEDIAN and split the array into two halves.
 	var q2 = median;
 	if (arr.length % 2 === 0) { // even
+		// 0, .. , len/2 - 1 , | , len/2, .. , len-1. (len)
+		//                     ^
+		//                     |-Cut from here
 		var ll = arr.slice(0, arr.length/2);
-		var rr = arr.slice(arr.length/2 + 1, arr.length);
+		var rr = arr.slice(arr.length/2, arr.length);
 	} else {
+		// 0, 1, 2
+		//    X
+		//    |-Get rid of this
 		var ll = arr.slice(0, (arr.length-1)/2);
-		var rr = arr.slice((arr.length-1)/2, arr.length);
+		var rr = arr.slice((arr.length-1)/2 + 1, arr.length);
 	}
 	var q1 = getMedian(ll);
 	var q3 = getMedian(rr);
