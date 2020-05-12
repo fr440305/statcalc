@@ -31,7 +31,7 @@ input {
 	margin: 0 auto;
 }
 
-#result {
+#dataset_analysis_result {
 	display: none;
 }
 	</style>
@@ -39,7 +39,16 @@ input {
 <body>
 	<textarea placeholder='1,2,1,3,4,5,6' id='data'></textarea>
 	<input type='button' value='Go' id='btn_calculate'></input>
-	<div id='result'>
+	<div id='dataset_analysis_result'>
+		<div id='characteristics'> </div>
+		<!--
+		<div id='grouped_frequency_table'>
+			<p><b>Grouped Frequency Table</b></p>
+			<p>Class width: <input type='text' id='classwidth'><input type='button' value='Go' id='calculate2'></p>
+
+
+		</div>
+		-->
 	</div>
 <script>
 TMPL = `
@@ -51,9 +60,10 @@ TMPL = `
 			<td>Modes</td>
 			<td>{{#modes}}{{.}}, {{/modes}}{{#hasmode}}appeared {{maxfreq}} times.{{/hasmode}}{{^modes}}N/A{{/modes}}</td>
 		</tr>
-		<tr><td>Minimum and Maximun</td><td>min = {{min}}, max = {{max}}</td></tr>
-		<tr><td>Quartiles</td><td>q1 = <b>{{q1}}</b>, q2 = <b>{{q2}}</b>, q3 = <b>{{q3}}</b></td></tr>
+		<tr><td>Minimum and Maximun</td><td>min = <b>{{min}}</b>, max = <b>{{max}}</b></td></tr>
 		<tr><td>Range</td><td>{{max}} - {{min}} = <b>{{range}}</b></td></tr>
+		<tr><td>Quartiles (q1 q3 exclude median)</td><td>q1 = <b>{{q1}}</b>, q2 = <b>{{q2}}</b>, q3 = <b>{{q3}}</b></td></tr>
+		<tr><td>IQR(q3 - q1)</td><td>{{q3}} - {{q1}} = <b>{{iqr}}</b></td></tr>
 		<tr>
 			<td>Standard Deviation (Popu)</td>
 			<td><math><msqrt><mi>{{variance}}</mi></msqrt></math> = <b>{{stddev}}</b></td>
@@ -61,7 +71,7 @@ TMPL = `
 		<tr><td>Variance (Popu)</td><td>{{variance}}</td></tr>
 	</table>
 
-<p><b>Frequency Table.</b></p>
+<p><b>Frequency Table</b></p>
 
 	<table>
 		<tr><td><b>Value</b></td><td><b>Frequency</b></td></tr>
@@ -72,14 +82,10 @@ TMPL = `
 `;
 </script>
 
-<!--
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
--->
 <script src="https://unpkg.com/mustache@latest"></script>
 <script>
 
-//TMPL = result.innerHTML;
+//TMPL = characteristics.innerHTML;
 
 function getArray(text) {
 	arr = [];
@@ -191,29 +197,31 @@ function getCharacteristicValues(arr) {
 		"min": arr[0],
 		"max": arr[arr.length-1],
 		"range": arr[arr.length-1] - arr[0],
-		//"quartiles": [arr[0], q1, q2, q3, arr[arr.length-1]]
 		"q1": q1,
 		"q2": q2,
-		"q3": q3
+		"q3": q3,
+		"iqr": (q3 - q1),
+		"outliers": [] // TODO
 	});
 }
 
 function renderResult(tmpl, res) {
 	var rendered = Mustache.render(tmpl, res);
 	console.log(rendered);
-	//result.innerText = JSON.stringify(res);
-	result.innerHTML = rendered;
+	//characteristics.innerText = JSON.stringify(res);
+	characteristics.innerHTML = rendered;
+	classwidth.placeholder = 'between 1 and ' + res.length.toString();
 }
 
 btn_calculate.onclick = function(){
 	var res = getCharacteristicValues(getArray(data.value));
 	console.log(res);
 	if (res.err && res.err.length > 0) {
-		result.innerText = res.err;
+		characteristics.innerText = res.err;
 	} else {
 		renderResult(TMPL, res);
 	}
-	result.style.display = 'block';
+	dataset_analysis_result.style.display = 'block';
 }
 
 </script>
