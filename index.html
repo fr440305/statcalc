@@ -1,0 +1,147 @@
+<!doctype html>
+
+<html>
+<head>
+	<meta charset='utf8'>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+textarea {
+	font-size: 18px;
+	width: 90%;
+	height: 50%;
+	margin: auto;
+}
+
+#btn_calculate {
+	width: 90%;
+	margin: auto;
+}
+	</style>
+</head>
+<body>
+	<textarea placeholder='23 34 12 33 45' id='data'></textarea>
+	<input type='button' value='Go' id='btn_calculate'></input>
+	<div id='result'></div>
+	<script>
+
+function getArray(text) {
+	arr = [];
+	//toks = text.split('\n').join(' ').split(' ');
+	toks = text.split(/(\s+)/).join(',').split(',');
+	for (i = 0; i < toks.length; i++) {
+		x = parseFloat(toks[i]);
+		if (x) {
+			arr.push(parseFloat(toks[i]));
+		}
+	}
+	// The implementation of `Array.sort()` might have issue on Firefox.
+	for (var i = 0; i < arr.length; i++) {
+		for (var j = i+1; j < arr.length; j++) {
+			if (arr[j] < arr[i]) {
+				var t = arr[i];
+				arr[i] = arr[j];
+				arr[j] = t;
+			}
+		}
+	}
+	console.log(arr);
+	return arr;
+}
+
+function getMedian(arr) {
+	// Assume that the array is sorted.
+	if (arr.length % 2 !== 0) {
+		median = arr[(arr.length-1)/2];
+	} else {
+		median = (arr[arr.length/2] + arr[arr.length/2-1]) / 2;
+	}
+	return median;
+}
+
+
+function getCharacteristicValues(arr) {
+	if (arr.length === 0) {
+		return ({"err": "Empty dataset is not valid."});
+	}
+	// Find mean.
+	var sum = 0;
+	for (var i = 0; i < arr.length; i++) {
+		sum += arr[i];
+	}
+	var mean = sum / arr.length;
+	// Find median.
+	var median = getMedian(arr);
+	// Find modes.
+	var dictValFreq = {};
+	var dictFreqVals = {};
+	var maxFreq = 1;
+	var modes = [];
+	for (var i = 0; i < arr.length; i++) {
+		if (dictValFreq[arr[i]] === undefined) {
+			dictValFreq[arr[i]] = 1;
+		} else {
+			dictValFreq[arr[i]] ++;
+		}
+	}
+	for (var val in dictValFreq) {
+		var freq = dictValFreq[val];
+		if (freq > maxFreq) {
+			maxFreq = freq;
+		}
+		if (dictFreqVals[freq] === undefined) {
+			dictFreqVals[freq] = [val];
+		} else {
+			dictFreqVals[freq].push(val);
+		}
+	}
+	if (maxFreq >= 2) {
+		modes = dictFreqVals[maxFreq];
+	}
+	// Find the Variance of Population.
+	var variance = 0;
+	for (var i = 0; i < arr.length; i++) {
+		variance += (arr[i] - mean) * (arr[i] - mean);
+	}
+	variance /= arr.length;
+	// Find quartiles: q1, q2, q3.
+	// If arr.length odd, then GET RID OF THE MEDIAN and split the array into two halves.
+	var q2 = median;
+	if (arr.length % 2 === 0) { // even
+		var ll = arr.slice(0, arr.length/2);
+		var rr = arr.slice(arr.length/2 + 1, arr.length);
+	} else {
+		var ll = arr.slice(0, (arr.length-1)/2);
+		var rr = arr.slice((arr.length-1)/2 + 1, arr.length);
+	}
+	var q1 = getMedian(ll);
+	var q3 = getMedian(rr);
+
+	// Finally...
+	return ({
+		"sorted": arr,
+		"length": arr.length,
+		"sum": sum,
+		"mean": mean,
+		"median": median,
+		"modes": modes,
+		"freqtable": dictValFreq,
+		"variance": variance,
+		"stddev": Math.sqrt(variance),
+		"minmax": [arr[0], arr[arr.length-1]],
+		"range": arr[arr.length-1] - arr[0],
+		"quartiles": [arr[0], q1, q2, q3, arr[arr.length-1]]
+	});
+}
+
+btn_calculate.onclick = function(){
+	info = getCharacteristicValues(getArray(data.value));
+	if (info.err !== undefined) {
+		result.innerText = info.err;
+	} else {
+		result.innerText = JSON.stringify(info);
+	}
+}
+
+	</script>
+</body>
+</html>
