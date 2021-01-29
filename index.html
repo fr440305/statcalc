@@ -92,13 +92,32 @@ TMPL = `
 `;
 
 function getArray(text) {
-	arr = [];
+	var arr = [];
 	//toks = text.split('\n').join(' ').split(' ');
-	toks = text.split(/(\s+)/).join(',').split(',');
-	for (i = 0; i < toks.length; i++) {
-		x = parseFloat(toks[i]);
-		if (x) {
-			arr.push(parseFloat(toks[i]));
+	var toks = text.split(/(\s+)/).join(',').split(',');
+	for (var i = 0; i < toks.length; i++) {
+		// For toks[i], we expect it to be a number or two numbers splited with a '#'.
+		//
+		// Note: "1#4" ::= "1, 1, 1, 1"
+		//
+		if (toks[i].includes('#')) {
+			// XXX : Buggy
+			var pair = toks[i].split('#');
+			var x = parseFloat(pair[0]);
+			var k = parseInt(pair[1]);
+
+			if (x && k) {
+				for (var j = 0; j < k; j++) {
+					arr.push(x);
+				}
+			}
+		} else {
+			var x = parseFloat(toks[i]);
+			if (x) {
+				arr.push(x);
+			} else {
+				// Error: Unexpected element.
+			}
 		}
 	}
 	// The implementation of `Array.sort()` might have issue on Firefox.
